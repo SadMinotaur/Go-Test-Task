@@ -7,7 +7,6 @@ import (
 	typesF "medods/src/types"
 )
 
-
 const (
 	mongoUrl   = "mongodb://localhost:27017/?readPreference=primary&ssl=false"
 	database   = "medods"
@@ -36,3 +35,25 @@ func SaveToken(rt typesF.RToken) error {
 	}
 	return nil
 }
+
+func GetToken(guid string, token []byte) (*typesF.RToken, error) {
+	session, err := mgo.Dial(mongoUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+	collection := session.DB(database).C(rTokensCol)
+	var tokens []typesF.RToken
+	err = collection.Find(bson.M{"GUID": guid}).All(&tokens)
+	if err != nil {
+		return nil, err
+	}
+	for _, t := range tokens {
+		err = bcrypt.CompareHashAndPassword([]byte(t.Token), token)
+		if err == nil {
+			return &t, nil
+		}
+	}
+	return nil, nil
+}
+
