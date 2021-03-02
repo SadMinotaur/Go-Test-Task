@@ -48,12 +48,11 @@ func GetToken(guid string, token []byte) (*typesF.RToken, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, t := range tokens {
-		err = bcrypt.CompareHashAndPassword([]byte(t.Token), token)
+	for _, tok := range tokens {
+		err = bcrypt.CompareHashAndPassword([]byte(tok.Token), token)
 		if err == nil {
-			return &t, nil
+			return &tok, nil
 		}
 	}
 	return nil, nil
 }
-

@@ -1,8 +1,8 @@
 package types
 
 type AToken struct {
-	GUID string
-	Token string
+	GUID    string
+	Token   string
 	Created int64
 	Expires int64
 }
