@@ -1,27 +1,27 @@
 package dao
 
 import (
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	typesF "medods/src/types"
 )
 
 
 const (
-	mongoUrl   = "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb"
+	mongoUrl   = "mongodb://localhost:27017/?readPreference=primary&ssl=false"
 	database   = "medods"
 	rTokensCol = "tokens"
 )
 
-func saveToken(rt typesF.RToken) error {
+func SaveToken(rt typesF.RToken) error {
 	session, err := mgo.Dial(mongoUrl)
 	if err != nil {
 		return err
 	}
 	collection := session.DB(database).C(rTokensCol)
-	session.Close()
-	info, err := collection.RemoveAll(bson.M{"GUID" : rt.GUID})
+	defer session.Close()
+	_, err = collection.RemoveAll(bson.M{"GUID": rt.GUID})
 	if err != nil {
 		return err
 	}

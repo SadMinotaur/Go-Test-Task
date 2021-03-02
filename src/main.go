@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	dao "medods/src/dao"
+	typesF "medods/src/types"
 	"net/http"
 	"os"
 )
@@ -12,6 +15,15 @@ func main() {
 	mux := http.NewServeMux()
 	//mux.HandleFunc("/first", )
 	//mux.HandleFunc("/second", )
+	s := dao.SaveToken(typesF.RToken{
+		GUID:          "test",
+		Token:         "test",
+		Created:       0,
+		AccessCreated: 0,
+		Expires:       0,
+		AccessExpires: 0,
+	})
+	fmt.Print(s)
 	server := &http.Server{
 		Addr:     ":3210",
 		ErrorLog: errorLog,
@@ -21,4 +33,5 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
+
 }
