@@ -1,13 +1,13 @@
 package types
 
-type aToken struct {
+type AToken struct {
 	GUID string
 	Token string
 	Created int64
 	Expires int64
 }
 
-type rToken struct {
+type RToken struct {
 	GUID          string
 	Token         string
 	Created       int64

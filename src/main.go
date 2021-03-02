@@ -17,8 +17,8 @@ func main() {
 		ErrorLog: errorLog,
 		Handler:  mux,
 	}
-	error := server.ListenAndServe()
-	if error != nil {
-		errorLog.Fatal(error)
+	err := server.ListenAndServe()
+	if err != nil {
+		errorLog.Fatal(err)
 	}
 }
