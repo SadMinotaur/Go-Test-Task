@@ -10,51 +10,7 @@ import (
 	"time"
 )
 
-func (serLogs *SerLogs) FirstRoute(w http.ResponseWriter, r *http.Request) {
-	guid := r.URL.Query().Get("guid")
-	if guid == "" {
-		serLogs.errorLog.Print(w, http.StatusBadRequest)
-		return
-	}
-	aToken, rToken, err := serLogs.getTokens(guid)
-	if err != nil {
-		serLogs.errorLog.Print(w, err)
-		return
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = fmt.Fprint(w, aToken.Token+"\n")
-	_, _ = fmt.Fprint(w, rToken.Token+"\n")
-}
-
-func (serLogs *SerLogs) SecondRoute(w http.ResponseWriter, r *http.Request) {
-	guidQ := r.URL.Query().Get("guid")
-	at := r.URL.Query().Get("at")
-	rt := r.URL.Query().Get("rt")
-	if rt == "" || at == "" || guidQ == "" {
-		serLogs.errorLog.Print(w, http.StatusBadRequest)
-		return
-	}
-	msg, err := utils.ValidTokens(guidQ, at, rt)
-	if err != nil {
-		serLogs.errorLog.Print(w, err)
-		return
-	}
-	if msg != "" {
-		_, _ = fmt.Fprintln(w, msg)
-		return
-	}
-	aToken, rToken, err := serLogs.getTokens(guidQ)
-	if err != nil {
-		serLogs.errorLog.Print(w, err)
-		return
-	}
-	base64RToken := base64.StdEncoding.EncodeToString([]byte(rToken.Token))
-	_, _ = fmt.Fprintln(w, "access-token: "+aToken.Token+"\n")
-	_, _ = fmt.Fprintln(w, "refresh-token: "+rToken.Token+"\n")
-	_, _ = fmt.Fprintln(w, "base64 refresh-token: "+base64RToken+"\n")
-}
-
-func (serLogs *SerLogs) getTokens(guid string) (typesF.AToken, typesF.RToken, error) {
+func (serLogs *SerLogs) getTokens(guid string, writer http.ResponseWriter) (typesF.AToken, typesF.RToken, error) {
 	rToken := typesF.RToken{
 		GUID:          guid,
 		Token:         utils.GenerateToken(guid, 20),
@@ -78,4 +34,49 @@ func (serLogs *SerLogs) getTokens(guid string) (typesF.AToken, typesF.RToken, er
 		return typesF.AToken{}, typesF.RToken{}, err
 	}
 	return aToken, rToken, nil
+}
+
+func (serLogs *SerLogs) FirstRoute(writer http.ResponseWriter, request *http.Request) {
+	guid := request.URL.Query().Get("guid")
+	if guid == "" {
+		serLogs.errorLog.Print(writer, http.StatusBadRequest)
+		return
+	}
+	TokenA, TokenR, err := serLogs.getTokens(guid, writer)
+	if err != nil {
+		serLogs.errorLog.Print(writer, err)
+		return
+	}
+	base64t := base64.StdEncoding.EncodeToString([]byte(TokenR.Token))
+	writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(writer, "<br/> <a href='/second?guid="+guid+
+		"&at="+TokenA.Token+"&rt="+base64t+"'>Второй маршрут</a>")
+}
+
+func (serLogs *SerLogs) SecondRoute(writer http.ResponseWriter, request *http.Request) {
+	guidQ := request.URL.Query().Get("guid")
+	at := request.URL.Query().Get("at")
+	rt := request.URL.Query().Get("rt")
+	if rt == "" || at == "" || guidQ == "" {
+		serLogs.errorLog.Print(writer, http.StatusBadRequest)
+		return
+	}
+	msg, err := utils.ValidTokens(guidQ, at, rt)
+	if err != nil {
+		serLogs.errorLog.Print(writer, err)
+		return
+	}
+	if msg != "" {
+		_, _ = fmt.Fprintln(writer, msg)
+		return
+	}
+	aToken, rToken, err := serLogs.getTokens(guidQ, writer)
+	if err != nil {
+		serLogs.errorLog.Print(writer, err)
+		return
+	}
+	base64RToken := base64.StdEncoding.EncodeToString([]byte(rToken.Token))
+	_, _ = fmt.Fprintln(writer, "access-token: "+aToken.Token+"\n")
+	_, _ = fmt.Fprintln(writer, "refresh-token: "+rToken.Token+"\n")
+	_, _ = fmt.Fprintln(writer, "base64 refresh-token: "+base64RToken+"\n")
 }

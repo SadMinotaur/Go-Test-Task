@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func ValidTokens(guid, jwtToken, base64RToken string) (string, error) {
+func ValidTokens(guid string, jwtToken string, base64RToken string) (string, error) {
 	rtQuery, err := base64.StdEncoding.DecodeString(base64RToken)
 	if err != nil {
 		return "", err
@@ -18,7 +18,7 @@ func ValidTokens(guid, jwtToken, base64RToken string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if (rtDB == &typesF.RToken{}) {
+	if (rtDB == typesF.RToken{}) {
 		return "Different refresh token", nil
 	}
 	rtDB.Token = string(rtQuery)
@@ -55,9 +55,9 @@ func GetToken(guid string, rToken string, created, expires int64) (string, error
 	claims["expires"] = expires
 	claims["rt"] = rToken
 	jwtRt.Claims = claims
-	jwtRtString, err := jwtRt.SignedString([]byte("sign"))
+	jwtRtS, err := jwtRt.SignedString([]byte("sign"))
 	if err != nil {
 		return "", err
 	}
-	return jwtRtString, nil
+	return jwtRtS, nil
 }
