@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -21,7 +20,7 @@ func SaveToken(rt typesF.RToken) error {
 	}
 	collection := session.DB(database).C(rTokensCol)
 	defer session.Close()
-	_, err = collection.RemoveAll(bson.M{"GUID": rt.GUID})
+	_, err = collection.RemoveAll(bson.M{"guid": rt.GUID})
 	if err != nil {
 		return err
 	}
@@ -45,14 +44,12 @@ func GetToken(guid string, token []byte) (typesF.RToken, error) {
 	defer session.Close()
 	collection := session.DB(database).C(rTokensCol)
 	var tokens []typesF.RToken
-	err = collection.Find(bson.M{"GUID": guid}).All(&tokens)
+	err = collection.Find(bson.M{"guid": guid}).All(&tokens)
 	if err != nil {
 		return typesF.RToken{}, err
 	}
 	for _, tok := range tokens {
 		err = bcrypt.CompareHashAndPassword([]byte(tok.Token), token)
-		fmt.Println(token)
-		fmt.Println([]byte(tok.Token))
 		if err == nil {
 			return tok, nil
 		}

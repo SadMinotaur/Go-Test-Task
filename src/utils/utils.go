@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func ValidTokens(guid string, jwtToken string, base64RToken string) (string, error) {
+func ValToken(guid string, jwtToken string, base64RToken string) (string, error) {
 	rtQuery, err := base64.StdEncoding.DecodeString(base64RToken)
 	if err != nil {
 		return "", err
@@ -38,11 +38,11 @@ func ValidTokens(guid string, jwtToken string, base64RToken string) (string, err
 	return "", nil
 }
 
-func GenerateToken(guid string, n int) string {
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+func GenToken(guid string, n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b) + guid
 }
